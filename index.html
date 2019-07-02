@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Xsolla Summer School Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <script type="text/x-template" id="grid-template">
+        <table>
+            <thead>
+                <tr>
+                    <th v-for="(key, name) in columns"
+                        @click="sortBy(key)"
+                        :class="{ active: sortKey == key }">
+                        {{ name }}
+                        <span :class="{ 'arrow': sortOrders[key] != 0, 'asc': sortOrders[key] > 0, 'dsc': sortOrders[key] < 0}">
+                        </span>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="entry in filtered">
+                    <td v-for="key in columns">
+                        {{ getValue(entry, key) }}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </script>
+
+    <script type="text/x-template" id="polygraph-template">
+        <svg :height="size" :width="size">
+            <g v-for="(stat, i) in stats">
+                <rect 
+                    :height="size / stats.length" 
+                    :width="size * stat.rate"
+                    :y="i * size / stats.length + 1"
+                    fill="#aaa" 
+                    stroke-width="1" stroke="#555"/>
+                <text x="10" :y="i * size / stats.length + size / stats.length / 2 + 5">
+                    {{ stat.name }}
+                </text>
+            </g>
+        </svg>
+    </script>
+
+    <script src="data.js"></script>
+</head>
+<body>
+    <!-- 
+    [v] Отобразить транзакции в виде таблицы (список столбцов на ваше усмотрение)
+    [v] Отображение списка всех проектов, по которым совершались платежи (поле project в transaction)
+    [v] Фильтрация таблицы по введенным данным (например, по проектам или пользователям)
+    [v] Отображение рейтинга популярности платежных систем (поле payment_method)
+    [v] Отображение графика популярности платежных систем.
+    -->
+    <div id="app">
+        <details>
+            <summary>Таблица</summary>
+            <form id="search">
+            Поиск по проектам/пользователям: <input name="query" v-model="searchQuery">
+            </form>
+            <demo-grid
+            :items="items"
+            :columns="columns"
+            :filter-by="filterBy"
+            :filter-key="searchQuery">
+            </demo-grid>
+        </details>
+        <details>
+            <summary>Список проектов</summary>
+            <ul id="project-list">
+                <li v-for="project in projects"> {{ project }} </li>
+            </ul>
+        </details>
+        <details>
+            <summary>Платёжные системы</summary>
+            <div class="flex">
+                <div>
+                    <ul>
+                        <li v-for="method in sortedRating">
+                            {{ method.name }} - {{ (method.rate * 100).toFixed(2) }}%
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <graph :size="400" :stats="sortedRating"></graph>
+                </div>
+            </div>
+        </details>
+    </div>
+    <script type="module" src="main.js"></script>
+</body>
+</html>
